@@ -1,0 +1,4 @@
+*_gen.go
+*.db
+*_gen.go
+migrations/dev/

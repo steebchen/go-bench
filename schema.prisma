@@ -1,0 +1,67 @@
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:prisma@localhost:5432/postgres?schema=sql_load_test"
+}
+
+generator db {
+	provider = "go run github.com/prisma/prisma-client-go"
+	output   = "./db/db_gen.go"
+	package  = "db"
+}
+
+model Comment {
+  author  Int
+  content   String?
+  createdAt DateTime
+  id        Int      @default(autoincrement()) @id
+  post    Int
+  updatedAt DateTime
+  VUser      User     @relation(fields: [author], references: [id])
+  VPost      Post     @relation(fields: [post], references: [id])
+  VLike      Like[]
+  @@index([author], name: "Comment.author")
+  @@index([post], name: "Comment.post")
+}
+
+model Like {
+  comment   Int
+  createdAt DateTime
+  id        Int      @default(autoincrement()) @id
+  post    Int
+  updatedAt DateTime
+  user    Int
+  VComment   Comment  @relation(fields: [comment], references: [id])
+  VPost      Post     @relation(fields: [post], references: [id])
+  VUser      User     @relation(fields: [user], references: [id])
+  @@index([comment], name: "Like.comment")
+  @@index([post], name: "Like.post")
+  @@index([user], name: "Like.user")
+}
+
+model Post {
+  author  Int
+  content   String?
+  createdAt DateTime
+  id        Int       @default(autoincrement()) @id
+  updatedAt DateTime
+  VUser      User      @relation(fields: [author], references: [id])
+  VComment   Comment[]
+  VLike      Like[]
+  @@index([author], name: "Post.author")
+}
+
+model User {
+  age         Int?
+  createdAt   DateTime
+  email       String?
+  firstName   String
+  id          Int       @default(autoincrement()) @id
+  lastName    String
+  password    String?
+  updatedAt   DateTime
+  VComment     Comment[]
+  VLike        Like[]
+  VPost        Post[]
+  VFriendsWith User[]    @relation("FriendShip", references: [id])
+  VFriendOf    User[]    @relation("FriendShip", references: [id])
+}
